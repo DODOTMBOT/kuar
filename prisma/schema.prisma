@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  owner
+  superadmin
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  lastName  String
+  role      Role     @default(owner)
+  venues    Venue[]
+  createdAt DateTime @default(now())
+}
+
+model Venue {
+  id      String @id @default(cuid())
+  name    String
+  type    String
+  city    String
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+}
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
