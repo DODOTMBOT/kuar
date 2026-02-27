@@ -14,13 +14,17 @@ enum Role {
 
 model User {
   id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  company   String
   email     String   @unique
   password  String
-  name      String
-  lastName  String
-  role      Role     @default(owner)
-  venues    Venue[]
+  role      Role     @default(owner) // Добавил использование твоего enum
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ИСПРАВЛЕНИЕ: Обратная связь для отношения с Venue
+  venues Venue[]
 }
 
 model Venue {
