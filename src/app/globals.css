@@ -3,28 +3,30 @@
 
 body {
   background-color: #F8FAFC;
+  font-family: 'Inter', sans-serif;
 }
 
-/* ВЫЖИГАЕМ ВСЕ ОБВОДКИ И ЛИНИИ */
-*:focus, 
-*:active, 
-*:focus-within, 
+/* ТОТАЛЬНЫЙ СБРОС ДЛЯ ВСЕХ ИНПУТОВ */
 input, 
-input:focus, 
-button:focus,
-[data-focus="true"],
-[data-focused="true"] {
+textarea, 
+select, 
+button,
+[data-slot="input"],
+[data-slot="input-wrapper"],
+[data-slot="inner-wrapper"] {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* Убираем синее/черное выделение при фокусе в Chrome и Safari */
+*:focus, 
+*:active,
+[data-focused="true"],
+[data-focus="true"] {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
-  ring: 0 !important;
-  --tw-ring-offset-width: 0px !important;
-  --tw-ring-width: 0px !important;
-}
-
-/* Убираем синие/черные рамки в Chrome и Safari */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
 }
