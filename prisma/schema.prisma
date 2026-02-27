@@ -19,12 +19,24 @@ model User {
   company   String
   email     String   @unique
   password  String
-  role      Role     @default(owner) // Добавил использование твоего enum
+  role      Role     @default(owner)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // ИСПРАВЛЕНИЕ: Обратная связь для отношения с Venue
-  venues Venue[]
+  // ПОЛЯ ДЛЯ ОНБОРДИНГА (добавьте это)
+  isSetupCompleted Boolean @default(false)
+  venuesCount      Int?
+  respName         String?
+  respLastName     String?
+  respPhone        String?
+  respEmail        String?
+  inn              String?
+  ogrn             String?
+  legalAddress     String?
+  bankAccount      String?
+  bik              String?
+
+  venues    Venue[]
 }
 
 model Venue {

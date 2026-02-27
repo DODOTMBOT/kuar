@@ -1,41 +1,30 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
-:root {
-  --background: #FFFFFF;
-  --foreground: #121212;
-}
-
 body {
-  background-color: #FFFFFF;
-  color: #121212;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
+  background-color: #F8FAFC;
 }
 
-/* 1. ЖЕСТКИЙ СБРОС ДЛЯ ВСЕХ ИНПУТОВ: убираем системные рамки */
-input {
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  background-clip: padding-box !important;
-}
-
-/* 2. УБИРАЕМ ТЕНИ И РАМКИ ПРИ ФОКУСЕ */
+/* ВЫЖИГАЕМ ВСЕ ОБВОДКИ И ЛИНИИ */
+*:focus, 
+*:active, 
+*:focus-within, 
+input, 
 input:focus, 
-input:active,
-*:focus {
+button:focus,
+[data-focus="true"],
+[data-focused="true"] {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
+  ring: 0 !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-width: 0px !important;
 }
 
-/* 3. ПОЛНОЕ УДАЛЕНИЕ ЭФФЕКТОВ АВТОЗАПОЛНЕНИЯ (серые/желтые фоны) */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active {
-  -webkit-text-fill-color: #121212 !important;
-  -webkit-box-shadow: 0 0 0px 1000px #f1f5f9 inset !important; /* Цвет slate-100 */
-  transition: background-color 5000s ease-in-out 0s;
+/* Убираем синие/черные рамки в Chrome и Safari */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

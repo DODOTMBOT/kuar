@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
 import LandingClient from "@/components/LandingClient";
 import { logout } from "@/app/login/actions";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -11,28 +12,30 @@ export default async function Home() {
   let user = null;
 
   if (userId) {
-    // Оборачиваем запрос к базе в try...catch
     try {
       user = await prisma.user.findUnique({
         where: { id: userId },
         include: { venues: true }
       });
     } catch (error) {
-      console.error("🚨 База данных Timeweb недоступна на главной странице (P1001):", error);
+      console.error("🚨 Ошибка БД:", error);
     }
   }
 
-  // Если юзера нет или база данных недоступна — показываем лендинг
   if (!user) {
     return <LandingClient />;
   }
 
-  // Если всё ок, пускаем в дашборд
+  // БЛОКИРОВКА: Если данные не заполнены и пользователь не админ
+  if (user.role === 'owner' && !user.isSetupCompleted) {
+    redirect('/setup');
+  }
+
   return (
     <DashboardClient 
-      userName={user.name} 
+      userName={user.firstName} 
       userRole={user.role} 
-      venueName={user.venues?.[0]?.name || "Без локации"} 
+      venueName={user.venues?.[0]?.name || "Новый партнер"} 
       logoutAction={logout}
     />
   );
