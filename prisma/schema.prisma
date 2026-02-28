@@ -10,6 +10,8 @@ datasource db {
 enum Role {
   owner
   superadmin
+  // Можно добавить роль для заведения, если вы будете использовать единую таблицу авторизации
+  venue_manager 
 }
 
 model User {
@@ -23,7 +25,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // ПОЛЯ ДЛЯ ОНБОРДИНГА (добавьте это)
   isSetupCompleted Boolean @default(false)
   venuesCount      Int?
   respName         String?
@@ -35,17 +36,23 @@ model User {
   legalAddress     String?
   bankAccount      String?
   bik              String?
-
-  venues    Venue[]
+  venues           Venue[]
 }
 
 model Venue {
-  id      String @id @default(cuid())
-  name    String
-  type    String
-  city    String
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id])
+  id        String   @id @default(cuid())
+  name      String
+  type      String?
+  city      String?
+  address   String   // <--- Новый столбец
+  login     String   @unique // <--- Новый столбец
+  password  String   // <--- Новый столбец
+  
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SystemConfig {

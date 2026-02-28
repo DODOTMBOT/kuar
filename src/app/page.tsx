@@ -1,42 +1,46 @@
+// src/app/page.tsx
+import { prisma as db } from "@/lib/db";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/db";
-import DashboardClient from "@/components/DashboardClient";
-import LandingClient from "@/components/LandingClient";
-import { logout } from "@/app/login/actions";
 import { redirect } from "next/navigation";
+import DashboardClient from "@/components/DashboardClient";
+import { logout } from "@/app/login/actions";
 
 export default async function Home() {
   const cookieStore = await cookies();
-  const userId = cookieStore.get('kuar_session')?.value;
+  const sessionValue = cookieStore.get("kuar_session")?.value;
 
-  let user = null;
-
-  if (userId) {
-    try {
-      user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: { venues: true }
-      });
-    } catch (error) {
-      console.error("🚨 Ошибка БД:", error);
-    }
+  if (!sessionValue) {
+    redirect("/login");
   }
+
+  // Если это заведение (точка), отправляем в её собственный раздел
+  if (sessionValue.startsWith("venue_")) {
+    redirect("/terminal");
+  }
+
+  // --- Ниже логика только для ПАРТНЕРА ---
+  const user = await db.user.findUnique({
+    where: { id: sessionValue },
+    include: { venues: true }
+  });
 
   if (!user) {
-    return <LandingClient />;
+    redirect("/login");
   }
 
-  // БЛОКИРОВКА: Если данные не заполнены и пользователь не админ
-  if (user.role === 'owner' && !user.isSetupCompleted) {
-    redirect('/setup');
+  // Блокируем доступ, если профиль не дозаполнен
+  if (user.role === "owner" && !user.isSetupCompleted) {
+    redirect("/setup");
   }
 
   return (
-    <DashboardClient 
-      userName={user.firstName} 
-      userRole={user.role} 
-      venueName={user.venues?.[0]?.name || "Новый партнер"} 
-      logoutAction={logout}
-    />
+    <div className="flex min-h-screen bg-gray-50">
+      <DashboardClient 
+        userName={user.firstName} 
+        userRole={user.role} 
+        companyName={user.company} 
+        logoutAction={logout} 
+      />
+    </div>
   );
 }
