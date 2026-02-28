@@ -39,6 +39,7 @@ export default async function Home() {
         userName={user.firstName} 
         userRole={user.role} 
         companyName={user.company} 
+        venues={user.venues} // <--- ДОБАВЛЕНО: передаем заведения для отображения финансов
         logoutAction={logout} 
       />
     </div>

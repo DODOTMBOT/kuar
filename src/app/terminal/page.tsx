@@ -9,38 +9,30 @@ export default async function TerminalPage() {
   const cookieStore = await cookies();
   const sessionValue = cookieStore.get("kuar_session")?.value;
 
-  if (!sessionValue) {
-    redirect("/login");
-  }
+  if (!sessionValue) redirect("/login");
+  if (!sessionValue.startsWith("venue_")) redirect("/");
 
-  // Защита от входа партнера в этот раздел
-  if (!sessionValue.startsWith("venue_")) {
-    redirect("/");
-  }
-
-  // Достаем ID заведения
   const venueId = sessionValue.replace("venue_", "");
   const venue = await db.venue.findUnique({
     where: { id: venueId },
     include: { owner: true }
   });
 
-  if (!venue) {
-    redirect("/login");
-  }
+  if (!venue) redirect("/login");
+
+  // Подсчет "Всего денег"
+  const totalMoney = (venue.safeBalance || 0) + (venue.registerBalance || 0);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       
-      {/* Подключаем наш умный Сайдбар и говорим ему, что мы "venue" (точка) */}
       <Sidebar 
-        userName={venue.name} // Пишем название точки вместо имени пользователя
-        companyName={venue.owner.company} // Название сети (компании партнера)
+        userName={venue.name} 
+        companyName={venue.owner.company} 
         logoutAction={logout}
-        userType="venue" // <--- КЛЮЧЕВОЙ МОМЕНТ
+        userType="venue" 
       />
 
-      {/* Основной контент со сдвигом от сайдбара */}
       <main className="flex-1 p-8 md:ml-64">
         <div className="max-w-6xl mx-auto">
           
@@ -51,20 +43,32 @@ export default async function TerminalPage() {
             </div>
           </div>
 
+          {/* НОВЫЙ БЛОК: ФИНАНСЫ ТОЧКИ */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-[#FF5500]">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Всего денег</p>
+              <p className="text-3xl font-black text-slate-800">{totalMoney.toLocaleString('ru-RU')} ₽</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">В сейфе</p>
+              <p className="text-3xl font-black text-slate-800">{(venue.safeBalance || 0).toLocaleString('ru-RU')} ₽</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">В кассах</p>
+              <p className="text-3xl font-black text-slate-800">{(venue.registerBalance || 0).toLocaleString('ru-RU')} ₽</p>
+            </div>
+          </div>
+
           {/* Заглушка интерфейса терминала */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Левая колонка (список заказов) */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-[500px]">
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-[400px]">
               <h2 className="text-lg font-semibold mb-4 text-gray-700">Очередь (0)</h2>
-              
               <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 pb-10">
                 <span className="text-5xl mb-4">🍽️</span>
                 <p>Здесь будут появляться новые заказы</p>
               </div>
             </div>
 
-            {/* Правая колонка (быстрые действия) */}
             <div className="flex flex-col gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Действия</h2>
@@ -76,7 +80,6 @@ export default async function TerminalPage() {
                 </button>
               </div>
             </div>
-
           </div>
 
         </div>
