@@ -6,9 +6,9 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 
+// Создание нового заведения
 export async function createVenue(formData: FormData) {
   const cookieStore = await cookies();
-  // ИСПРАВЛЕНО: имя куки kuar_session
   const userId = cookieStore.get("kuar_session")?.value;
 
   if (!userId) {
@@ -42,6 +42,23 @@ export async function createVenue(formData: FormData) {
       password: hashedPassword,
       ownerId: userId,
     },
+  });
+
+  revalidatePath("/venues");
+}
+
+// Добавление новой кассы к заведению
+export async function createRegister(formData: FormData) {
+  const venueId = formData.get("venueId") as string;
+  const name = formData.get("name") as string;
+
+  if (!venueId || !name) {
+    throw new Error("Не указано название кассы или заведение");
+  }
+
+  // Создаем новую кассу и привязываем её к заведению
+  await db.cashRegister.create({
+    data: { name, venueId },
   });
 
   revalidatePath("/venues");

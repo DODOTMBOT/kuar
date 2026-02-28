@@ -21,7 +21,11 @@ export default async function Home() {
   // --- Ниже логика только для ПАРТНЕРА ---
   const user = await db.user.findUnique({
     where: { id: sessionValue },
-    include: { venues: true }
+    include: { 
+      venues: {
+        include: { registers: true } // <--- ИСПРАВЛЕНО: обязательно подтягиваем кассы для подсчета баланса
+      } 
+    }
   });
 
   if (!user) {
@@ -39,7 +43,7 @@ export default async function Home() {
         userName={user.firstName} 
         userRole={user.role} 
         companyName={user.company} 
-        venues={user.venues} // <--- ДОБАВЛЕНО: передаем заведения для отображения финансов
+        venues={user.venues} // Передаем заведения (уже вместе с их кассами)
         logoutAction={logout} 
       />
     </div>

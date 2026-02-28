@@ -48,15 +48,29 @@ model Venue {
   login           String   @unique
   password        String
   
-  // --- НОВЫЕ ПОЛЯ ДЛЯ ДЕНЕГ ---
-  safeBalance     Int      @default(0) // В сейфе (в рублях)
-  registerBalance Int      @default(0) // В кассах (в рублях)
+  safeBalance     Int      @default(0) // В сейфе (остается у точки)
+  // Поле registerBalance удалено!
+  
+  registers       CashRegister[] // <--- ДОБАВЛЕНО (Связь с кассами)
 
   ownerId         String
   owner           User     @relation(fields: [ownerId], references: [id])
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+// --- НОВАЯ ТАБЛИЦА ДЛЯ КАСС ---
+model CashRegister {
+  id        String   @id @default(cuid())
+  name      String   // Название кассы (например, "Касса 1")
+  balance   Int      @default(0) // Денег в конкретной кассе
+  
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SystemConfig {

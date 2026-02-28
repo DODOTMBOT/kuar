@@ -1,3 +1,4 @@
+// src/components/DashboardClient.tsx
 "use client";
 
 import { useState } from "react";
@@ -9,7 +10,7 @@ interface Venue {
   id: string;
   name: string;
   safeBalance: number;
-  registerBalance: number;
+  registers: { balance: number }[]; // Изменено: теперь кассы - это массив
 }
 
 interface DashboardProps {
@@ -26,9 +27,13 @@ export default function DashboardClient({ userName, companyName, userRole, venue
   // Состояние выбранного заведения (по умолчанию первое)
   const [selectedVenueId, setSelectedVenueId] = useState<string>(venues.length > 0 ? venues[0].id : "");
 
-  // Находим активное заведение и считаем общую сумму
+  // Находим активное заведение
   const activeVenue = venues.find(v => v.id === selectedVenueId);
-  const totalMoney = activeVenue ? (activeVenue.safeBalance || 0) + (activeVenue.registerBalance || 0) : 0;
+  
+  // Считаем сумму всех касс конкретного заведения
+  const registerTotal = activeVenue?.registers?.reduce((sum, r) => sum + r.balance, 0) || 0;
+  // Считаем общую сумму (в сейфе + во всех кассах)
+  const totalMoney = activeVenue ? (activeVenue.safeBalance || 0) + registerTotal : 0;
 
   const modules = [
     { id: 'contacts', title: '📞 Контакты', desc: 'База всех пиццерий', color: 'bg-[#FF5500]', href: '/contacts' },
@@ -66,7 +71,7 @@ export default function DashboardClient({ userName, companyName, userRole, venue
           )}
         </header>
 
-        {/* НОВЫЙ БЛОК: Финансы выбранного заведения */}
+        {/* Финансы выбранного заведения */}
         {activeVenue ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-[#FF5500]">
@@ -79,7 +84,7 @@ export default function DashboardClient({ userName, companyName, userRole, venue
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">В кассах</p>
-              <p className="text-3xl font-black text-slate-800">{(activeVenue.registerBalance || 0).toLocaleString('ru-RU')} ₽</p>
+              <p className="text-3xl font-black text-slate-800">{registerTotal.toLocaleString('ru-RU')} ₽</p>
             </div>
           </div>
         ) : (
